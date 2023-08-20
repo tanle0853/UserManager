@@ -1,5 +1,6 @@
 <template>
-  <h1>Danh sach sinh vien</h1>
+<div>
+  <h1>Danh sach User</h1>
   <ul class="list-group">
     <li
       class="list-group-item list-group-item-action p-4"
@@ -9,9 +10,10 @@
       @click="this.$router.push(`/user/${user._id}`)"
     >
       {{ index + 1 }}.
-      {{ user.title }}
+      {{ user.username }}
     </li>
   </ul>
+  </div>
 </template>
 
 <script lang="ts">

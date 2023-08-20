@@ -1,9 +1,11 @@
 <template>
+<div>
   <Navbar />
 
   <main class="container py-5">
     <router-view />
   </main>
+  </div>
 </template>
 
 <script lang="ts">
