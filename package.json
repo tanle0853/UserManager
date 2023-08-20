@@ -11,6 +11,8 @@
     "start": "npm --openssl-legacy-provider start --prefix server"
   },
   "dependencies": {
+    "@types/vue": "^2.0.0",
+    "@vue/runtime-core": "^3.3.4",
     "axios": "^0.23.0",
     "bootswatch": "^5.1.3",
     "core-js": "^3.18.3",
@@ -18,27 +20,30 @@
     "mongoose": "^7.0.3",
     "mongose": "^0.0.2-security",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.22",
-    "vue": "^3.0.0",
+    "nodemon": "^3.0.1",
     "vue-class-component": "^8.0.0-0",
-    "vue-router": "^4.0.12"
+    "vue-router": "^4.2.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@vue/cli-plugin-babel": "~4.5.14",
-    "@vue/cli-plugin-eslint": "~4.5.14",
-    "@vue/cli-plugin-typescript": "~4.5.14",
-    "@vue/cli-service": "~4.5.14",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-plugin-typescript": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.20",
     "@vue/eslint-config-typescript": "^8.0.0",
+    "@vue/test-utils": "^2.4.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^7.19.1",
     "rimraf": "^3.0.2",
-    "typescript": "~4.4.4"
+    "ts-node-dev": "^2.0.0",
+    "typescript": "~4.4.4",
+    "vue": "^3.3.4"
   },
   "description": "To execute this project you need **Mongodb** installed and running.",
   "main": ".eslintrc.js",
