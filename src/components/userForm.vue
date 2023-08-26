@@ -7,18 +7,18 @@
           class="form-control mb-3"
           placeholder="User name"
           type="title"
-          v-model="user.title"
+          v-model="user.username"
           autofocus
         />
-        <password
+        <input
           class="form-control mb-3"
           placeholder="password"
           rows="3"
-          v-model="user.description"
-        ></password>
+          v-model="user.password"
+        />
         <button
           class="btn btn-primary w-100"
-          :disabled="!user.title || !user.description"
+          :disabled="!user.username || !user.password"
         >
           Luu
         </button>

@@ -1,43 +1,45 @@
 <template>
-  <h1>Danh sach sinh vien</h1>
+<div>
+  <h1>Danh sach User</h1>
   <ul class="list-group">
     <li
       class="list-group-item list-group-item-action p-4"
       style="cursor: pointer"
-      v-for="(user, index) in user"
+      v-for="(user, index) in users"
       :key="index"
       @click="this.$router.push(`/user/${user._id}`)"
     >
       {{ index + 1 }}.
-      {{ user.title }}
+      {{ user.username }}
     </li>
   </ul>
+  </div>
 </template>
 
 <script lang="ts">
 import { user } from "@/interfaces/user";
-import { getuser } from "@/services/userervice";
+import { getusers } from "@/services/userService";
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "user-list",
+  name: "users-list",
   data() {
     return {
-      user: [] as user[],
+      users: [] as user[],
     };
   },
   methods: {
-    async loaduser() {
+    async loadUsers() {
       try {
         const res = await getusers();
-        this.user = res.data;
+        this.users = res.data;
       } catch (error) {
         console.error(error);
       }
     },
   },
   mounted() {
-    this.loaduser();
+    this.loadUsers();
   },
 });
 </script>

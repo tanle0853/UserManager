@@ -19,7 +19,7 @@
             <router-link class="nav-link" to="/">Danh sach</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/tasks/new">Them moi</router-link>
+            <router-link class="nav-link" to="/user/new">Them moi</router-link>
           </li>
         </ul>
       </div>
