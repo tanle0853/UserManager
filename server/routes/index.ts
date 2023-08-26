@@ -49,6 +49,14 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "An error occurred" });
   }
+
+  // API đăng xuất
+  router.post("/logout", (req, res) => {
+    // Thực hiện logic đăng xuất ở đây, ví dụ như xóa session hoặc hủy JWT token
+
+    res.json({ message: "Logout successful" });
+  });
+
 });
 
 
