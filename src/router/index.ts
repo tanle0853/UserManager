@@ -8,16 +8,19 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../components/userList.vue"),
   },
   {
-    path: "/",
-    alias: "/user/new",
+    path: "/user/new",
     name: "user-new",
     component: () => import("../components/userForm.vue"),
   },
   {
-    path: "/",
-    alias: "/user/:id",
+    path: "/user/:id",
     name: "user-details",
     component: () => import("../components/userDetail.vue"),
+  },
+  {
+    path: "/login", // Đường dẫn cho trang đăng nhập
+    name: "login", // Tên của tuyến
+    component: () => import("../components/Login.vue"), // Đường dẫn đến Component Login
   },
 ];
 

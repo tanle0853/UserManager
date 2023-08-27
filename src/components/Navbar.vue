@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <router-link class="navbar-brand" to="/">Quan ly user</router-link>
+      <router-link :to="brandLink" class="navbar-brand">Quản lý user</router-link>
       <button
         class="navbar-toggler"
         type="button"
@@ -15,11 +15,11 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/">Danh sach</router-link>
+          <li class="nav-item" v-if="showListAndAdd">
+            <router-link class="nav-link" to="/">Danh sách</router-link>
           </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/user/new">Them moi</router-link>
+          <li class="nav-item" v-if="showListAndAdd">
+            <router-link class="nav-link" to="/user/new">Thêm mới</router-link>
           </li>
         </ul>
       </div>
@@ -32,5 +32,15 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "Navbar",
+  computed: {
+    showListAndAdd() {
+      // Điều chỉnh logic dựa vào trạng thái đăng nhập
+      return !this.$route.name || this.$route.name !== "login";
+    },
+    brandLink() {
+      // Điều chỉnh liên kết dựa vào trang đăng nhập
+      return this.$route.name === "login" ? "#" : "/";
+    },
+  },
 });
 </script>
