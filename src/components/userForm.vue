@@ -44,7 +44,7 @@ export default defineComponent({
       try {
         const res = await createuser(this.user);
         console.log(res);
-        this.$router.push({ name: "users" });
+        this.$router.push({ name: "user" });
       } catch (error) {
         console.error(error);
       }
