@@ -11,6 +11,7 @@
           autofocus
         />
         <input
+          type="password"
           class="form-control mb-3"
           placeholder="password"
           rows="3"
