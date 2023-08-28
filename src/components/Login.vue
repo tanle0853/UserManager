@@ -23,7 +23,7 @@
           class="btn btn-primary w-100"
           :disabled="!username || !password || loading"
         >
-          {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+          {{ loading ? "Đang đăng nhập..." : "Đăng nhập" }}
         </button>
       </form>
     </div>
@@ -60,6 +60,8 @@ export default defineComponent({
 
         if (response.status === 200) {
           // Lưu token vào localStorage
+         localStorage.setItem("username", response.data.username);  // Lưu cả đối tượng người dùng
+
           localStorage.setItem("userToken", response.data.token);
           router.push("/user");
         }
