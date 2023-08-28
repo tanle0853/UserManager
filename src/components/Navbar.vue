@@ -22,14 +22,14 @@
             <router-link class="nav-link" to="/user/new">Thêm mới</router-link>
           </li>
           <li class="nav-item" v-if="isLoggedIn">
-            <router-link class="nav-link" :to="userLink">
-              <span @click="toggleLogout">{{ username }}</span>
-              <ul v-if="isLogoutVisible" class="dropdown-menu">
+            <div class="nav-link dropdown" @click="toggleDropdown" v-if="!isLoggedOut">
+              <span>{{ username }}</span>
+              <ul v-if="isDropdownVisible" class="dropdown-menu" @click="stopPropagation">
                 <li>
                   <a class="dropdown-item" href="#" @click="logout">Đăng xuất</a>
                 </li>
               </ul>
-            </router-link>
+            </div>
           </li>
         </ul>
       </div>
@@ -43,16 +43,18 @@ interface NavbarComponent {
   showListAndAdd: boolean;
   brandLink: string;
   isLoggedIn: boolean;
-  isLogoutVisible: boolean;
+  isDropdownVisible: boolean;
   username: string | null;
   userLink: string;
+  isLoggedOut: boolean;
   logout: () => void;
 }
 export default defineComponent<NavbarComponent>({
   name: "Navbar",
   data() {
     return {
-      isLogoutVisible: false,
+      isDropdownVisible: false,
+      isLoggedOut: false,
     };
   },
   computed: {
@@ -78,43 +80,38 @@ export default defineComponent<NavbarComponent>({
     },
   },
   methods: {
-    toggleLogout() {
-      this.isLogoutVisible = !this.isLogoutVisible;
+    toggleDropdown() {
+      this.isDropdownVisible = !this.isDropdownVisible;
     },
     logout() {
       localStorage.removeItem("userToken");
       localStorage.removeItem("username");
-      this.$router.push("/login");
+      (this.isLoggedOut = true), this.$router.push("/login");
+    },
+    stopPropagation(event: MouseEvent) {
+      event.stopPropagation();
     },
   },
 });
 </script>
-<style>
-.user-dropdown {
+
+<style scoped>
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;
+  display: none;
   background-color: white;
   border: 1px solid #ccc;
-  padding: 5px;
-  display: none;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.nav-item:hover .user-dropdown {
+.dropdown:hover .dropdown-menu {
   display: block;
-}
-
-.user-link {
-  display: block;
-  padding: 5px 10px;
-  text-decoration: none;
-  color: black;
-}
-
-.logout-link {
-  display: block;
-  padding: 5px 10px;
-  text-decoration: none;
-  color: black;
 }
 </style>
