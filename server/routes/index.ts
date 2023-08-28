@@ -3,7 +3,7 @@ import User from "../models/User";
 
 const router = Router();
 
-router.get("/user", async (req, res) => {
+router.post("/user", async (req, res) => {
   const users = await User.find();
   res.json(users);
 });
@@ -33,7 +33,7 @@ router.delete("/user/:id", async (req, res) => {
 });
 
 // API đăng nhập
-router.post("api/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {

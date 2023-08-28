@@ -21,6 +21,12 @@
           <li class="nav-item" v-if="showListAndAdd">
             <router-link class="nav-link" to="/user/new">Thêm mới</router-link>
           </li>
+          <li class="nav-item" v-if="isLoggedIn">
+            <router-link class="nav-link" :to="userLink">{{ username }}</router-link>
+          </li>
+          <li class="nav-item" v-if="isLoggedIn">
+            <a class="nav-link" href="#" @click="logout">Đăng xuất</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -30,16 +36,38 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-export default defineComponent({
+interface NavbarComponent {
+  showListAndAdd: boolean;
+  brandLink: string;
+  isLoggedIn: boolean;
+  username: string | null;
+  userLink: string;
+  logout: () => void;
+}
+
+export default defineComponent<NavbarComponent>({
   name: "Navbar",
   computed: {
     showListAndAdd() {
-      // Điều chỉnh logic dựa vào trạng thái đăng nhập
-      return !this.$route.name || this.$route.name !== "login";
+      return this.$route.name !== "Login";
     },
     brandLink() {
-      // Điều chỉnh liên kết dựa vào trang đăng nhập
-      return this.$route.name === "login" ? "#" : "/";
+      return this.$route.name === "Login" ? "#" : "/";
+    },
+    isLoggedIn() {
+      return localStorage.getItem("userToken") !== null;
+    },
+    username() {
+      return localStorage.getItem("username");
+    },
+    userLink() {
+      return this.isLoggedIn ? "/user" : "#";
+    },
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("userToken");
+      this.$router.push("/login");
     },
   },
 });

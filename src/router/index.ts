@@ -2,6 +2,11 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
   {
+    path: "/login",
+    name: "Login",
+    component: () => import("../components/Login.vue"), // Thay đổi đường dẫn và component tương ứng
+  },
+  {
     path: "/",
     alias: "/user",
     name: "user",
@@ -16,12 +21,7 @@ const routes: RouteRecordRaw[] = [
     path: "/user/:id",
     name: "user-details",
     component: () => import("../components/userDetail.vue"),
-  },
-  {
-    path: "/login", // Đường dẫn cho trang đăng nhập
-    name: "login", // Tên của tuyến
-    component: () => import("../components/Login.vue"), // Đường dẫn đến Component Login
-  },
+  }
 ];
 
 console.log(process.env.BASE_URL);

@@ -16,6 +16,9 @@
           placeholder="Mật khẩu"
           v-model="password"
         />
+        <!-- Display error message if loginError is not empty -->
+        <p v-if="loginError" class="text-danger">{{ loginError }}</p>
+
         <button
           class="btn btn-primary w-100"
           :disabled="!username || !password || loading"
@@ -30,33 +33,41 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { loginUser } from "@/services/userService";
+import { useRouter } from "vue-router";
+import { AxiosResponse } from "axios"; // Thêm dòng này
 
 export default defineComponent({
   setup() {
+    const router = useRouter();
     const username = ref("");
     const password = ref("");
-    const loading = ref(false); // Thêm biến loading để quản lý trạng thái đăng nhập
+    const loading = ref(false);
+    const loginError = ref("");
 
     const login = async () => {
       try {
-        loading.value = true; // Bắt đầu quá trình đăng nhập
+        loading.value = true;
+        loginError.value = "";
 
         const loginData = {
           username: username.value,
           password: password.value,
         };
 
-        const response = await loginUser(loginData);
+        const response: AxiosResponse<any> = await loginUser(loginData);
 
-        // Xử lý logic đăng nhập thành công ở đây
         console.log(response);
 
-        // Điều hướng đến trang sau khi đăng nhập thành công
-        // this.$router.push({ name: "Home" });
+        if (response.status === 200) {
+          // Lưu token vào localStorage
+          localStorage.setItem("userToken", response.data.token);
+          router.push("/user");
+        }
       } catch (error) {
         console.error(error);
+        loginError.value = "Tên đăng nhập hoặc mật khẩu không chính xác.";
       } finally {
-        loading.value = false; // Kết thúc quá trình đăng nhập
+        loading.value = false;
       }
     };
 
@@ -64,6 +75,7 @@ export default defineComponent({
       username,
       password,
       loading,
+      loginError,
       login,
     };
   },
