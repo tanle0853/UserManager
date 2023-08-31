@@ -60,7 +60,7 @@ export default defineComponent({
 
         if (response.status === 200) {
           // Lưu token vào localStorage
-         localStorage.setItem("username", response.data.username);  // Lưu cả đối tượng người dùng
+          localStorage.setItem("userData", JSON.stringify(response.data));
 
           localStorage.setItem("userToken", response.data.token);
           router.push("/user");

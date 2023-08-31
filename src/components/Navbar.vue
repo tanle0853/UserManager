@@ -22,7 +22,7 @@
             <router-link class="nav-link" to="/user/new">Thêm mới</router-link>
           </li>
           <li class="nav-item" v-if="isLoggedIn">
-            <div class="nav-link dropdown" @click="toggleDropdown" v-if="!isLoggedOut">
+            <div class="nav-link dropdown" style="cursor: pointer" @click="toggleDropdown" v-if="!isLoggedOut">
               <span>{{ username }}</span>
               <ul v-if="isDropdownVisible" class="dropdown-menu" @click="stopPropagation">
                 <li>
@@ -74,7 +74,7 @@ export default defineComponent<NavbarComponent>({
       const userData = localStorage.getItem("userData");
       if (userData) {
         const user = JSON.parse(userData);
-        return user.username;
+        return user.user.username;
       }
       return null;
     },
