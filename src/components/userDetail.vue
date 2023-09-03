@@ -5,14 +5,14 @@
 
       <input
         type="text"
-        v-model="currentuser.title"
+        v-model="currentuser.username"
         class="form-control mb-3"
       />
 
-      <textarea
-        v-model="currentuser.description"
+      <!-- <textarea
+        v-model="currentuser.password"
         class="form-control mb-3"
-      ></textarea>
+      ></textarea> -->
 
       <button class="btn btn-primary">Luu</button>
     </form>

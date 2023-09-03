@@ -11,6 +11,7 @@
           autofocus
         />
         <input
+          type="password"
           class="form-control mb-3"
           placeholder="password"
           rows="3"
@@ -43,7 +44,7 @@ export default defineComponent({
       try {
         const res = await createuser(this.user);
         console.log(res);
-        this.$router.push({ name: "users" });
+        this.$router.push({ name: "user" });
       } catch (error) {
         console.error(error);
       }
