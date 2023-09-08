@@ -1,103 +1,143 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import User from "../models/User";
+import RefreshToken from "../models/RefreshToken";
 import { Password } from '../password';
+import { Types } from "mongoose";
+import dotenv from 'dotenv';
 
+dotenv.config();
 
 const router = Router();
 
-router.get("/user", async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-});
-
-router.post("/user", async (req, res) => {
-  const { username, password } = req.body;
-  const newUser = new User({ username, password });
-  const savedUser = await newUser.save();
-  res.json(savedUser);
-});
-
-router.get("/user/:id", async (req, res) => {
-  const user = await User.findById(req.params.id);
-  res.json(user);
-});
-
-router.put("/user/:id", async (req, res) => {
-  const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.json(updatedUser);
-});
-
-router.delete("/user/:id", async (req, res) => {
-  const user = await User.findByIdAndDelete(req.params.id);
-  res.json(user);
-});
-
-// API đăng nhập
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-
+const createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
-    const user = await User.findOne({ username });
+    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
+    const refreshToken = jwt.sign({ userId }, secretKey, { expiresIn: "7d" });
 
-    if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
-    }
+    const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
+    await newRefreshToken.save();
 
-    if (password === undefined) {
-      return res.status(401).json({ message: "Password is undefined" });
-    }
+    return refreshToken;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to create refresh token");
+  }
+};
 
-    const isPasswordValid = await Password.verify(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid username or password" });
-    }
-    const secretKey = process.env.JWT_SECRET;
-
-    // Tiếp tục xử lý đăng nhập thành công
-    const token = jwt.sign({ userId: user._id }, secretKey, {
-      expiresIn: "5m",
-    });
-
-    res.json({ message: "Login successful", user, token });
+router.get("/user", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
   }
 });
-// Tạo và lưu trữ Refresh Token khi người dùng đăng nhập
-const createRefreshToken = async (userId) => {
-  const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: "7d", // Ví dụ: Refresh Token hết hạn sau 7 ngày
-  });
-  // Lưu refreshToken vào cơ sở dữ liệu, ví dụ MongoDB
-  await RefreshToken.create({ userId, token: refreshToken });
-  return refreshToken;
-};
 
-// Xử lý việc làm mới Access Token bằng Refresh Token
+router.post("/user", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const newUser = new User({ username, password });
+    const savedUser = await newUser.save();
+    res.json(savedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.put("/user/:id", async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.delete("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    if (typeof password !== 'string') {
+      return res.status(400).json({ message: "Password is invalid" });
+    }
+
+    if (typeof user.password !== 'string') {
+      return res.status(500).json({ message: "User password is invalid" });
+    }
+
+    const isPasswordValid = await Password.verify(password, user.password);
+
+    // Log the hashed password before comparison
+    console.log("Hashed Password:", user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    // Rest of your code
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
     return res.status(401).json({ message: "No refresh token found" });
   }
-
   try {
-    // Kiểm tra tính hợp lệ của Refresh Token và lấy userId từ nó
-    const { userId } = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 
-    // Kiểm tra xem Refresh Token có tồn tại trong cơ sở dữ liệu không
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(refreshToken, secretKey) as { userId: string };
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const { userId } = decodedToken;
+
     const storedRefreshToken = await RefreshToken.findOne({ userId, token: refreshToken });
 
     if (!storedRefreshToken) {
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
-    // Tạo một Access Token mới
-    const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    const accessToken = jwt.sign({ userId }, secretKey, {
       expiresIn: "1h",
     });
 
@@ -108,19 +148,11 @@ router.post("/refresh", async (req, res) => {
   }
 });
 
-
 router.post("/logout", async (req, res) => {
   const { refreshToken } = req.body;
 
   try {
-    // Xóa Refresh Token khỏi cơ sở dữ liệu
     await RefreshToken.deleteOne({ token: refreshToken });
-
-    // Xóa Access Token và Refresh Token (nếu có) trên máy khách (clear cookie)
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
-
-    // Hủy session hoặc thực hiện các hành động đăng xuất khác
 
     res.json({ message: "Logout successful" });
   } catch (error) {
@@ -128,6 +160,5 @@ router.post("/logout", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-
 
 export default router;
