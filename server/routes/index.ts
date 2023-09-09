@@ -15,11 +15,10 @@ router.use(cookieParser());
 
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
-    const refreshToken = uuid(); // Sử dụng uuidv4 để sinh Refresh Token
-
+    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
+    const refreshToken = jwt.sign(uuid(), secretKey, { expiresIn: "1d" });; // Sử dụng uuid để sinh Refresh Token
     const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
     await newRefreshToken.save();
-
     return refreshToken;
   } catch (error) {
     console.error(error);
@@ -90,6 +89,9 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
+    if (password === undefined) {
+      return res.status(401).json({ message: "Password is undefined" });
+    }
     const isPasswordValid = await Password.verify(String(password), String(user.password));
 
     if (!isPasswordValid) {
@@ -108,7 +110,7 @@ router.post("/login", async (req, res) => {
 
     // 3. Tạo và gửi Refresh Token vào Cookie
     const refreshToken = _createRefreshToken(user._id);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 ngày
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 1 * 24 * 60 * 60 * 1000 }); // 1 ngày
 
     // 4. Trả về thông tin người dùng đã đăng nhập
     res.json({ message: "Login successful", user, token });
@@ -158,7 +160,8 @@ router.post("/logout", async (req, res) => {
 
   try {
     await RefreshToken.deleteOne({ token: refreshToken });
-
+    // Xóa Refresh Token (nếu có) trên máy khách (clear cookie)
+    res.clearCookie("refreshToken");
     res.json({ message: "Logout successful" });
   } catch (error) {
     console.error(error);
