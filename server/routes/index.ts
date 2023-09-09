@@ -16,7 +16,7 @@ router.use(cookieParser());
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
     const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
-    const refreshToken = jwt.sign(uuid(), secretKey, { expiresIn: "1d" });; // Sử dụng uuid để sinh Refresh Token
+    const refreshToken = uuid();
     const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
     await newRefreshToken.save();
     return refreshToken;
@@ -157,9 +157,9 @@ router.post("/refresh", async (req, res) => {
 
 router.post("/logout", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-
+  console.log("refreshToken", refreshToken);
   try {
-    await RefreshToken.deleteOne({ token: refreshToken });
+    await RefreshToken.deleteOne({ refreshToken });
     // Xóa Refresh Token (nếu có) trên máy khách (clear cookie)
     res.clearCookie("refreshToken");
     res.json({ message: "Logout successful" });
