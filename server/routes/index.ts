@@ -127,7 +127,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/refresh", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken.token;
+  const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
     return res.status(401).json({ message: "No refresh token found" });
@@ -162,7 +162,7 @@ router.post("/refresh", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken.token;
+  const refreshToken = req.cookies.refreshToken;
   console.log("refreshToken", refreshToken);
   try {
     await RefreshToken.deleteOne({ refreshToken });
