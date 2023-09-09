@@ -87,31 +87,30 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
-
-    if (typeof password !== 'string') {
-      return res.status(400).json({ message: "Password is invalid" });
-    }
-
-    if (typeof user.password !== 'string') {
-      return res.status(500).json({ message: "User password is invalid" });
-    }
-
-    const isPasswordValid = await Password.verify(password, user.password);
-
-    // Log the hashed password before comparison
-    console.log("Hashed Password:", user.password);
+    const isPasswordValid = await Password.verify(String(password), String(user.password));
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
-    // Rest of your code
+    // Xác minh mật khẩu thành công, bạn có thể thực hiện các hành động sau đây:
+
+    // 1. Tạo phiên làm việc (session)
+    //req.session.userId = user._id;
+
+    // 2. Tạo token xác thực và gửi về cho người dùng
+    //const token = generateAuthToken(user); // Điều này đòi hỏi một hàm để tạo token xác thực
+
+    // 3. Trả về thông tin người dùng đã đăng nhập
+    //res.json({ message: "Login successful", user, token });
+    res.json({ message: "Login successful", user });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
   }
 });
+
 
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
