@@ -9,6 +9,7 @@ const refreshTokenSchema = new Schema({
   token: {
     type: String,
     required: true,
+    unique: true,
   },
   createdAt: {
     type: Date,

@@ -5,15 +5,17 @@ import RefreshToken from "../models/RefreshToken";
 import { Password } from '../password';
 import { Types } from "mongoose";
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import { v4 as uuid } from 'uuid';
 
 dotenv.config();
 
 const router = Router();
+router.use(cookieParser());
 
-const createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
+const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
-    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
-    const refreshToken = jwt.sign({ userId }, secretKey, { expiresIn: "7d" });
+    const refreshToken = uuid(); // Sử dụng uuidv4 để sinh Refresh Token
 
     const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
     await newRefreshToken.save();
@@ -100,12 +102,16 @@ router.post("/login", async (req, res) => {
     const secretKey = String(process.env.JWT_SECRET);
 
     // 2. Tạo token xác thực và gửi về cho người dùng
-    const token = jwt.sign({ userId: user._id }, secretKey, {
+    const token = jwt.sign({ userId: user._id, userName: user.username }, secretKey, {
       expiresIn: "5m",
     });
-    // 3. Trả về thông tin người dùng đã đăng nhập
-    res.json({ message: "Login successful", user, token });
 
+    // 3. Tạo và gửi Refresh Token vào Cookie
+    const refreshToken = _createRefreshToken(user._id);
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 ngày
+
+    // 4. Trả về thông tin người dùng đã đăng nhập
+    res.json({ message: "Login successful", user, token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
@@ -113,7 +119,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/refresh", async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
     return res.status(401).json({ message: "No refresh token found" });
@@ -148,7 +154,7 @@ router.post("/refresh", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken;
 
   try {
     await RefreshToken.deleteOne({ token: refreshToken });
