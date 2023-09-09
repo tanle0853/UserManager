@@ -38,7 +38,8 @@ router.get("/user", async (req, res) => {
 router.post("/user", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const newUser = new User({ username, password });
+    const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
+    const newUser = new User({ username, password: hashedPassword }); // Lưu trữ mật khẩu đã được mã hóa
     const savedUser = await newUser.save();
     res.json(savedUser);
   } catch (error) {
