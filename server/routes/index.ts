@@ -17,9 +17,15 @@ const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
     const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
     const refreshToken = uuid();
+    const expiresIn = '1d'; // Thời hạn là 1 ngày
+
     const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
     await newRefreshToken.save();
-    return refreshToken;
+
+    // Tạo token với thời hạn
+    const token = jwt.sign({ userId }, secretKey, { expiresIn });
+
+    return token;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to create refresh token");
@@ -121,7 +127,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/refresh", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const refreshToken = req.cookies.refreshToken.token;
 
   if (!refreshToken) {
     return res.status(401).json({ message: "No refresh token found" });
@@ -156,7 +162,7 @@ router.post("/refresh", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const refreshToken = req.cookies.refreshToken.token;
   console.log("refreshToken", refreshToken);
   try {
     await RefreshToken.deleteOne({ refreshToken });
