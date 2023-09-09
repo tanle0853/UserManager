@@ -92,7 +92,7 @@ export default defineComponent<NavbarComponent>({
     logout() {
       logoutUser();
       localStorage.removeItem("userToken");
-      localStorage.removeItem("username");
+      localStorage.removeItem("userData");
       (this.isLoggedOut = true), this.$router.push("/login");
     },
     stopPropagation(event: MouseEvent) {
