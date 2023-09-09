@@ -7,6 +7,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../components/Login.vue"), // Thay đổi đường dẫn và component tương ứng
   },
   {
+    path: "/logout",
+    name: "Logout",
+    component: () => import("../components/Navbar.vue"), // Thay đổi đường dẫn và component tương ứng
+  },
+  {
     path: "/",
     alias: "/user",
     name: "user",

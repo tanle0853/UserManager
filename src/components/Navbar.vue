@@ -22,7 +22,12 @@
             <router-link class="nav-link" to="/user/new">Thêm mới</router-link>
           </li>
           <li class="nav-item" v-if="isLoggedIn">
-            <div class="nav-link dropdown" style="cursor: pointer" @click="toggleDropdown" v-if="!isLoggedOut">
+            <div
+              class="nav-link dropdown"
+              style="cursor: pointer"
+              @click="toggleDropdown"
+              v-if="!isLoggedOut"
+            >
               <span>{{ username }}</span>
               <ul v-if="isDropdownVisible" class="dropdown-menu" @click="stopPropagation">
                 <li>
@@ -39,6 +44,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { logoutUser } from "@/services/userService";
 interface NavbarComponent {
   showListAndAdd: boolean;
   brandLink: string;
@@ -84,6 +90,7 @@ export default defineComponent<NavbarComponent>({
       this.isDropdownVisible = !this.isDropdownVisible;
     },
     logout() {
+      logoutUser();
       localStorage.removeItem("userToken");
       localStorage.removeItem("username");
       (this.isLoggedOut = true), this.$router.push("/login");

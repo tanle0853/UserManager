@@ -31,4 +31,12 @@ export const deleteuser = async (id: string): Promise<AxiosResponse> =>
 export const loginUser = async (loginData: LoginData): Promise<AxiosResponse> => {
   return axiosInstance.post("/login", loginData);
 };
-
+export const logoutUser = async () => {
+  try {
+    await axiosInstance.post('/logout');
+    // Sau khi đăng xuất thành công, bạn có thể thực hiện các thay đổi khác, như xóa thông tin đăng nhập khỏi localStorage hoặc chuyển hướng người dùng đến trang đăng nhập.
+  } catch (error) {
+    console.error("Logout failed:", error);
+    // Xử lý lỗi (nếu có) ở đây
+  }
+};
