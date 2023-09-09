@@ -97,21 +97,20 @@ router.post("/login", async (req, res) => {
     // Xác minh mật khẩu thành công, bạn có thể thực hiện các hành động sau đây:
 
     // 1. Tạo phiên làm việc (session)
-    //req.session.userId = user._id;
+    const secretKey = String(process.env.JWT_SECRET);
 
     // 2. Tạo token xác thực và gửi về cho người dùng
-    //const token = generateAuthToken(user); // Điều này đòi hỏi một hàm để tạo token xác thực
-
+    const token = jwt.sign({ userId: user._id }, secretKey, {
+      expiresIn: "5m",
+    });
     // 3. Trả về thông tin người dùng đã đăng nhập
-    //res.json({ message: "Login successful", user, token });
-    res.json({ message: "Login successful", user });
+    res.json({ message: "Login successful", user, token });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
   }
 });
-
 
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
