@@ -15,21 +15,43 @@ router.use(cookieParser());
 
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
+    // Kiểm tra nếu Refresh Token tồn tại cho userId
+    const existingRefreshToken = await RefreshToken.findOne({ userId });
+
+    if (existingRefreshToken) {
+      const currentDateTime = new Date();
+
+      // Kiểm tra xem Refresh Token có hết hạn hay không
+      if (existingRefreshToken.createdAt <= currentDateTime) {
+        // Xóa Refresh Token nếu nó đã hết hạn
+        await RefreshToken.deleteOne({ userId }); // Hoặc bạn có thể sử dụng deleteMany nếu cần
+      }
+    }
+
+    // Tiếp tục với việc tạo mới Refresh Token và Token truy cập (nếu cần)
+
     const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
     const refreshToken = uuid();
-    const expiresIn = '1d'; // Thời hạn là 1 ngày
+    const expiresIn = '1d'; // Thời hạn của Token truy cập là 1 ngày
 
     const newRefreshToken = new RefreshToken({ userId, token: refreshToken });
+
+    // Đặt thời hạn cho Refresh Token
+    const refreshExpiration = new Date();
+    refreshExpiration.setDate(refreshExpiration.getDate() + 1); // 1 ngày sau
+    newRefreshToken.createdAt = refreshExpiration;
+
     await newRefreshToken.save();
 
-    // Tạo token với thời hạn
+    // Tạo Token truy cập với thời hạn
     const token = jwt.sign({ userId }, secretKey, { expiresIn });
 
     return token;
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to create refresh token");
+    throw new Error("Failed to create or remove refresh token");
   }
+
 };
 
 router.get("/user", async (req, res) => {
@@ -165,14 +187,30 @@ router.post("/logout", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   console.log("refreshToken", refreshToken);
   try {
+    // Lấy thông tin user dựa trên refreshToken
+    const refreshTokenDoc = await RefreshToken.findOne({ refreshToken });
+
+    if (!refreshTokenDoc) {
+      // Nếu không tìm thấy refreshToken, có thể xem là đã logout thành công
+      res.json({ message: "Logout successful" });
+      return;
+    }
+
+    // Xóa refreshToken tương ứng khỏi cơ sở dữ liệu
     await RefreshToken.deleteOne({ refreshToken });
-    // Xóa Refresh Token (nếu có) trên máy khách (clear cookie)
+
+    // Xóa Refresh Token trên máy khách (clear cookie)
     res.clearCookie("refreshToken");
+
+    // Đồng thời, bạn cũng có thể xóa AccessToken nếu bạn muốn
+    // Ví dụ: await AccessToken.deleteOne({ userId: refreshTokenDoc.userId });
+
     res.json({ message: "Logout successful" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
   }
 });
+
 
 export default router;
