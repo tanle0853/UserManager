@@ -98,6 +98,16 @@ router.put("/user/:id", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
+router.get("/user/search/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    const users = await User.find({ username: { $regex: username, $options: 'i' } }); // Tìm kiếm không phân biệt chữ hoa chữ thường
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
 
 router.delete("/user/:id", async (req, res) => {
   try {
