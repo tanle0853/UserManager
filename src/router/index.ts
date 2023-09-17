@@ -26,7 +26,13 @@ const routes: RouteRecordRaw[] = [
     path: "/user/:id",
     name: "user-details",
     component: () => import("../components/userDetail.vue"),
+  },
+  {
+    path: "/user/search/:username",
+    name: "user-search",
+    component: () => import("../components/userList.vue"), // Change to your actual search component
   }
+  
 ];
 
 console.log(process.env.BASE_URL);

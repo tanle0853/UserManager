@@ -9,9 +9,10 @@
         placeholder="Tìm kiếm theo tên người dùng"
         v-model="searchQuery"
       />
-      <button class="btn btn-outline-secondary" type="button" @click="searchUsers">
-        Tìm kiếm
-      </button>
+     <button class="btn btn-outline-secondary text-white" style="background-color: var(--bs-heading-color)" type="button" @click="searchUsers">
+  Tìm kiếm
+</button>
+
     </div>
     <ul class="list-group">
       <li
@@ -32,6 +33,7 @@
 import { user } from "@/interfaces/user";
 import { getusers } from "@/services/userService";
 import { defineComponent } from "vue";
+import { searchUsers } from "@/services/userService";
 
 export default defineComponent({
   name: "users-list",
@@ -50,11 +52,11 @@ export default defineComponent({
         console.error(error);
       }
     },
-    ,
+    
     async searchUsers() {
       try {
         // Gửi yêu cầu tìm kiếm với giá trị `searchQuery`
-        const res = await searchUsersByQuery(this.searchQuery);
+        const res = await searchUsers(this.searchQuery);
         this.users = res.data;
       } catch (error) {
         console.error(error);
