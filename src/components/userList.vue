@@ -1,6 +1,18 @@
 <template>
   <div>
     <h1>Danh sach User</h1>
+    <!-- Thêm hộp tìm kiếm và nút tìm kiếm -->
+    <div class="input-group mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Tìm kiếm theo tên người dùng"
+        v-model="searchQuery"
+      />
+      <button class="btn btn-outline-secondary" type="button" @click="searchUsers">
+        Tìm kiếm
+      </button>
+    </div>
     <ul class="list-group">
       <li
         class="list-group-item list-group-item-action p-4"
@@ -26,12 +38,23 @@ export default defineComponent({
   data() {
     return {
       users: [] as user[],
+       searchQuery: "",
     };
   },
   methods: {
     async loadUsers() {
       try {
         const res = await getusers();
+        this.users = res.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    ,
+    async searchUsers() {
+      try {
+        // Gửi yêu cầu tìm kiếm với giá trị `searchQuery`
+        const res = await searchUsersByQuery(this.searchQuery);
         this.users = res.data;
       } catch (error) {
         console.error(error);
