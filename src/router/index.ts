@@ -28,10 +28,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../components/userDetail.vue"),
   },
   {
-    path: "/user/search/:username",
+    path: "/user/search/:username?",
     name: "user-search",
-    component: () => import("../components/userList.vue"), // Change to your actual search component
-  }
+    component: () => import("../components/userList.vue"), // Component cho trang tìm kiếm
+    props: (route) => ({ username: route.params.username || '' })
+  }  
   
 ];
 
