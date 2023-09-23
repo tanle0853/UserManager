@@ -98,6 +98,20 @@ router.put("/user/:id", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
+router.get("/user/search/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
+    if (username) {
+      query = { username: { $regex: username, $options: 'i' } };
+    }
+    const users = await User.find(query);
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
 
 router.delete("/user/:id", async (req, res) => {
   try {

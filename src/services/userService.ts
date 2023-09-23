@@ -31,6 +31,9 @@ export const deleteuser = async (id: string): Promise<AxiosResponse> =>
 export const loginUser = async (loginData: LoginData): Promise<AxiosResponse> => {
   return axiosInstance.post("/login", loginData);
 };
+export const searchUsers = async (username: string): Promise<AxiosResponse<user[]>> => {
+  return axiosInstance.get(`/user/search/${username}`);
+};
 export const logoutUser = async () => {
   try {
     await axiosInstance.post('/logout');

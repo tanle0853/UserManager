@@ -26,7 +26,14 @@ const routes: RouteRecordRaw[] = [
     path: "/user/:id",
     name: "user-details",
     component: () => import("../components/userDetail.vue"),
-  }
+  },
+  {
+    path: "/user/search/:username?",
+    name: "user-search",
+    component: () => import("../components/userList.vue"), // Component cho trang tìm kiếm
+    props: (route) => ({ username: route.params.username || '' })
+  }  
+  
 ];
 
 console.log(process.env.BASE_URL);
