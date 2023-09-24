@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted} from "vue";
 import { loginUser } from "@/services/userService";
 import { useRouter } from "vue-router";
 import { AxiosResponse } from "axios"; // Thêm dòng này
@@ -43,7 +43,13 @@ export default defineComponent({
     const password = ref("");
     const loading = ref(false);
     const loginError = ref("");
-
+    // Kiểm tra nếu đã đăng nhập, chuyển hướng đến trang home
+    onMounted(() => {
+      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+      if (userData && userData.token) {
+        router.push("/user"); // Thay đổi "/home" thành đường dẫn trang chính của bạn
+      }
+    });
     const login = async () => {
       try {
         loading.value = true;
