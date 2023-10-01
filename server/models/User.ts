@@ -1,9 +1,17 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
-const userSchema = new Schema(
+export interface IUser extends Document {
+  username: string;
+  password: string;
+  role: 'user' | 'admin';
+  done: boolean;
+}
+
+const userSchema = new Schema<IUser>(
   {
     username: String,
     password: String,
+    role: { type: String, enum: ['user', 'admin'], default: 'user' }, // Thêm trường role
     done: { type: Boolean, default: false },
   },
   {
@@ -12,4 +20,4 @@ const userSchema = new Schema(
   }
 );
 
-export default model("user", userSchema);
+export default model<IUser>("user", userSchema);
