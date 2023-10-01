@@ -1,17 +1,19 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import jwt, { Secret } from "jsonwebtoken";
-import User from "../models/User";
+import User, { IUser } from "../models/User";
 import RefreshToken from "../models/RefreshToken";
 import { Password } from '../password';
 import { Types } from "mongoose";
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { v4 as uuid } from 'uuid';
+import { checkRole, authenticateToken } from '../models/middleware';
 
 dotenv.config();
 
 const router = Router();
 router.use(cookieParser());
+router.use(authenticateToken);
 
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
@@ -54,7 +56,7 @@ const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
 
 };
 
-router.get("/user", async (req, res) => {
+router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -63,8 +65,9 @@ router.get("/user", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
+;
 
-router.post("/user", async (req, res) => {
+router.post("/user", checkRole('admin'), async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
@@ -113,7 +116,7 @@ router.get("/user/search/:username", async (req, res) => {
   }
 });
 
-router.delete("/user/:id", async (req, res) => {
+router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     res.json(user);
@@ -225,6 +228,5 @@ router.post("/logout", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-
 
 export default router;
