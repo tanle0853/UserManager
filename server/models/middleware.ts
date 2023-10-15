@@ -12,7 +12,6 @@ declare global {
 }
 
 export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Response, next: NextFunction) => {
-  // Sử dụng NonNullable để loại bỏ khả năng giá trị null
   if (req.user && req.user.role === role) {
     next();
   } else {
@@ -20,18 +19,28 @@ export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Respons
   }
 };
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('Authenticate Token Middleware');
   const token = req.header("Authorization");
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 
-  jwt.verify(token, secretKey, async (err, user) => {
-    if (err) return res.status(403).json({ message: "Invalid token" });
+  try {
+    const decodedToken = jwt.verify(token, secretKey) as { userId: string };
+    const user = await User.findById(decodedToken.userId);
 
-    // Lưu thông tin người dùng vào đối tượng req
-    req.user = await User.findById((user as { userId: string }).userId);
+    if (!user) {
+      return res.status(403).json({ message: "User not found" });
+    }
+
+    req.user = user;
     next();
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(403).json({ message: "Invalid token" });
+  }
 };
+

@@ -13,8 +13,6 @@ dotenv.config();
 
 const router = Router();
 router.use(cookieParser());
-router.use(authenticateToken);
-
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
     // Kiểm tra nếu Refresh Token tồn tại cho userId
@@ -55,77 +53,6 @@ const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   }
 
 };
-
-router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-;
-
-router.post("/user", checkRole('admin'), async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body;
-    const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
-    const newUser = new User({ username, password: hashedPassword }); // Lưu trữ mật khẩu đã được mã hóa
-    const savedUser = await newUser.save();
-    res.json(savedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-
-router.get("/user/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-
-router.put("/user/:id", async (req, res) => {
-  try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-router.get("/user/search/:username", async (req, res) => {
-  try {
-    const username = req.params.username;
-    let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
-    if (username) {
-      query = { username: { $regex: username, $options: 'i' } };
-    }
-    const users = await User.find(query);
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-
-router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Response) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -194,6 +121,76 @@ router.post("/refresh", async (req, res) => {
     });
 
     res.json({ message: "Access token refreshed", accessToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+router.use(authenticateToken);
+router.get("/user", async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+;
+
+router.post("/user", checkRole('admin'), async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
+    const newUser = new User({ username, password: hashedPassword }); // Lưu trữ mật khẩu đã được mã hóa
+    const savedUser = await newUser.save();
+    res.json(savedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.put("/user/:id", async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+router.get("/user/search/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
+    if (username) {
+      query = { username: { $regex: username, $options: 'i' } };
+    }
+    const users = await User.find(query);
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Response) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    res.json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
