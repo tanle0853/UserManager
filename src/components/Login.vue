@@ -31,10 +31,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted} from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { loginUser } from "@/services/userService";
 import { useRouter } from "vue-router";
 import { AxiosResponse } from "axios"; // Thêm dòng này
+import axios from "axios";
 
 export default defineComponent({
   setup() {
@@ -70,6 +71,11 @@ export default defineComponent({
 
           localStorage.setItem("userToken", response.data.token);
           router.push("/user");
+          const token = localStorage.getItem("userToken");
+          if (token) {
+            // Thêm token vào header Authorization trong mỗi yêu cầu
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          }
         }
       } catch (error) {
         console.error(error);

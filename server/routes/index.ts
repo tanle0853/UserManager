@@ -126,7 +126,6 @@ router.post("/refresh", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-router.use(authenticateToken);
 router.get("/user", async (req: Request, res: Response) => {
   try {
     const users = await User.find();
@@ -150,7 +149,7 @@ router.post("/user", checkRole('admin'), async (req: Request, res: Response) => 
     res.status(500).json({ message: "An error occurred" });
   }
 });
-
+router.use(authenticateToken);
 router.get("/user/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
