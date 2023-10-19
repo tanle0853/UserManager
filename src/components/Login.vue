@@ -74,7 +74,11 @@ export default defineComponent({
           const token = localStorage.getItem("userToken");
           if (token) {
             // Thêm token vào header Authorization trong mỗi yêu cầu
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            // Thêm token vào header Authorization trong mỗi yêu cầu
+            axios.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${response.data.token}`;
+
           }
         }
       } catch (error) {

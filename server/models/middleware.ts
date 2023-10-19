@@ -21,16 +21,20 @@ export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Respons
 
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('Authenticate Token Middleware');
-  const token = req.header("Authorization");
+
+  const token = req.header('Authorization');
+  console.log('anh ban toi la tan day', token);
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 
   try {
+    //loi tai day
     const decodedToken = jwt.verify(token, secretKey) as { userId: string };
+    console.log("decodedToken", decodedToken);
     const user = await User.findById(decodedToken.userId);
+    console.log("user", user);
 
     if (!user) {
       return res.status(403).json({ message: "User not found" });

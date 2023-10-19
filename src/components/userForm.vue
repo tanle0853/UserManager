@@ -32,7 +32,7 @@
 import { defineComponent } from "vue";
 import { user } from "@/interfaces/user";
 import { createuser } from "@/services/userService";
-
+import axios from "axios";
 export default defineComponent({
   data() {
     return {
@@ -41,6 +41,12 @@ export default defineComponent({
   },
   methods: {
     async saveuser() {
+      const token = localStorage.getItem("userToken");
+
+      if (token) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      }
+
       try {
         const res = await createuser(this.user);
         console.log(res);

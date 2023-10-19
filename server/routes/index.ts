@@ -9,10 +9,12 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuid } from 'uuid';
 import { checkRole, authenticateToken } from '../models/middleware';
 
+// Đọc biến môi trường từ tệp .env
 dotenv.config();
 
 const router = Router();
 router.use(cookieParser());
+const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
   try {
     // Kiểm tra nếu Refresh Token tồn tại cho userId
@@ -24,13 +26,12 @@ const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
       // Kiểm tra xem Refresh Token có hết hạn hay không
       if (existingRefreshToken.createdAt <= currentDateTime) {
         // Xóa Refresh Token nếu nó đã hết hạn
-        await RefreshToken.deleteOne({ userId }); // Hoặc bạn có thể sử dụng deleteMany nếu cần
+        await RefreshToken.deleteOne({ userId });
       }
     }
 
     // Tiếp tục với việc tạo mới Refresh Token và Token truy cập (nếu cần)
 
-    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
     const refreshToken = uuid();
     const expiresIn = '1d'; // Thời hạn của Token truy cập là 1 ngày
 
@@ -51,8 +52,8 @@ const _createRefreshToken = async (userId: Types.ObjectId): Promise<string> => {
     console.error(error);
     throw new Error("Failed to create or remove refresh token");
   }
-
 };
+
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -72,16 +73,16 @@ router.post("/login", async (req, res) => {
 
     // Xác minh mật khẩu thành công, bạn có thể thực hiện các hành động sau đây:
 
-    // 1. Tạo phiên làm việc (session)
-    const secretKey = String(process.env.JWT_SECRET);
-
+    // 1. Sử dụng cùng một secretKey từ biến môi trường
+    
     // 2. Tạo token xác thực và gửi về cho người dùng
     const token = jwt.sign({ userId: user._id, userName: user.username }, secretKey, {
-      expiresIn: "5m",
+      expiresIn: "2h",
     });
+    console.log("token", token);
 
     // 3. Tạo và gửi Refresh Token vào Cookie
-    const refreshToken = _createRefreshToken(user._id);
+    const refreshToken = _createRefreshToken(user._id); // Truyền secretKey vào hàm
     res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 1 * 24 * 60 * 60 * 1000 }); // 1 ngày
 
     // 4. Trả về thông tin người dùng đã đăng nhập
@@ -92,6 +93,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
 router.post("/refresh", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -99,7 +101,6 @@ router.post("/refresh", async (req, res) => {
     return res.status(401).json({ message: "No refresh token found" });
   }
   try {
-    const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 
     let decodedToken;
     try {
@@ -126,7 +127,8 @@ router.post("/refresh", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-router.get("/user", async (req: Request, res: Response) => {
+router.use(authenticateToken);
+router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -149,8 +151,8 @@ router.post("/user", checkRole('admin'), async (req: Request, res: Response) => 
     res.status(500).json({ message: "An error occurred" });
   }
 });
-router.use(authenticateToken);
-router.get("/user/:id", async (req, res) => {
+
+router.get("/user/:id", checkRole('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     res.json(user);
@@ -160,7 +162,7 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
-router.put("/user/:id", async (req, res) => {
+router.put("/user/:id", checkRole('admin'), async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -171,7 +173,7 @@ router.put("/user/:id", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-router.get("/user/search/:username", async (req, res) => {
+router.get("/user/search/:username", checkRole('admin'), async (req, res) => {
   try {
     const username = req.params.username;
     let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
@@ -196,7 +198,7 @@ router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Respons
   }
 });
 
-router.post("/logout", async (req, res) => {
+router.post("/logout", checkRole('admin'), async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   console.log("refreshToken", refreshToken);
   try {
