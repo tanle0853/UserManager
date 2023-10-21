@@ -15,14 +15,13 @@ declare global {
   }
 }
 const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
-export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Response, next: NextFunction) => {
-  if (req.user && req.user.role === role) {
+export const checkRole = (roles: ('user' | 'admin')[]) => (req: Request, res: Response, next: NextFunction) => {
+  if (req.user && roles.includes(req.user.role)) {
     next();
   } else {
     res.status(403).json({ message: "Forbidden" });
   }
 };
-
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
 

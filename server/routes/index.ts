@@ -173,7 +173,9 @@ router.get("/user/search/:username", async (req, res) => {
 });
 
 router.use(authenticateToken);
-router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
+// Sử dụng middleware cho cả admin và user
+// Sử dụng middleware cho cả admin và user
+router.get("/user", checkRole(['admin', 'user']), async (req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -182,9 +184,8 @@ router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-;
 
-router.post("/user", checkRole('admin'), async (req: Request, res: Response) => {
+router.post("/user", checkRole(['admin']), async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
@@ -197,7 +198,7 @@ router.post("/user", checkRole('admin'), async (req: Request, res: Response) => 
   }
 });
 
-router.get("/user/:id", checkRole('admin'), async (req, res) => {
+router.get("/user/:id", checkRole(['admin', 'user']), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     res.json(user);
@@ -207,7 +208,7 @@ router.get("/user/:id", checkRole('admin'), async (req, res) => {
   }
 });
 
-router.put("/user/:id", checkRole('admin'), async (req, res) => {
+router.put("/user/:id", checkRole(['admin']), async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -219,7 +220,7 @@ router.put("/user/:id", checkRole('admin'), async (req, res) => {
   }
 });
 
-router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Response) => {
+router.delete("/user/:id", checkRole(['admin']), async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     res.json(user);
