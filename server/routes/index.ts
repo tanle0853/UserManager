@@ -157,14 +157,25 @@ router.post("/logout", async (req, res) => {
   }
 });
 
-router.get("/user/search/:username", async (req, res) => {
+router.use(authenticateToken);
+
+// Endpoint để tìm kiếm người dùng dựa trên username
+router.get("/user/search/:username", checkRole(['admin', 'user']), async (req, res) => {
   try {
     const username = req.params.username;
     let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
     if (username) {
       query = { username: { $regex: username, $options: 'i' } };
     }
+
     const users = await User.find(query);
+    
+    // Ẩn người dùng hiện tại khỏi danh sách
+    const currentUserIndex = users.findIndex(user => user._id.toString() === (req as any).user._id.toString());
+    if (currentUserIndex !== -1) {
+      users.splice(currentUserIndex, 1);
+    }
+
     res.json(users);
   } catch (error) {
     console.error(error);
@@ -172,18 +183,23 @@ router.get("/user/search/:username", async (req, res) => {
   }
 });
 
-router.use(authenticateToken);
-// Sử dụng middleware cho cả admin và user
-// Sử dụng middleware cho cả admin và user
+// Endpoint để lấy danh sách tất cả người dùng
 router.get("/user", checkRole(['admin', 'user']), async (req: Request, res: Response) => {
   try {
     const users = await User.find();
+    // Ẩn người dùng hiện tại khỏi danh sách
+    const currentUserIndex = users.findIndex(user => user._id.toString() === (req as any).user._id.toString());
+    if (currentUserIndex !== -1) {
+      users.splice(currentUserIndex, 1);
+    }
+
     res.json(users);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });
   }
 });
+
 
 router.post("/user", checkRole(['admin']), async (req: Request, res: Response) => {
   try {

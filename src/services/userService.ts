@@ -16,10 +16,6 @@ export const loginUser = async (loginData: LoginData): Promise<AxiosResponse> =>
   return axiosInstance.post('/login', loginData);
 };
 
-export const searchUsers = async (username: string): Promise<AxiosResponse<user[]>> => {
-  return axiosInstance.get(`/user/search/${username}`);
-};
-
 export const logoutUser = async () => {
   try {
     await axiosInstance.post('/logout');
@@ -34,10 +30,33 @@ const getUserToken = (): string | null => {
   return localStorage.getItem('userToken');
 };
 
+export const searchUsers = async (username: string): Promise<AxiosResponse<user[]>> => {
+  const token = getUserToken();
 
-// Các hàm API với token đã được thêm tự động
-// export const getusers = async (): Promise<AxiosResponse<user[]>> =>
-//   axiosInstance.get('/user');
+  if (token) {
+    try {
+      const response = await axiosInstance.get(`/user/search/${username}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        return response as AxiosResponse<user[]>;
+      } else {
+        throw new Error('Invalid response data format');
+      }
+    } catch (error) {
+      console.error('Get users error:', error);
+      throw error;
+    }
+  } else {
+    throw new Error('Unauthorized');
+  }
+
+};
+
 export const getusers = async (): Promise<AxiosResponse<user[]>> => {
   const token = getUserToken();
 

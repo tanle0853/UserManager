@@ -1,23 +1,27 @@
 <template>
   <div class="col-md-4 offset-md-4">
     <form @submit.prevent="handleUpdate()" class="card card-body">
-      <h1 class="card-title my-3 text-center">Cap nhat</h1>
-
+      <h1 class="card-title my-3 text-center">Cập nhật</h1>
       <input
         type="text"
         v-model="currentuser.username"
         class="form-control mb-3"
+        :disabled="!isAdmin"
       />
 
-      <!-- <textarea
-        v-model="currentuser.password"
-        class="form-control mb-3"
-      ></textarea> -->
+      <select v-model="currentuser.role" class="form-control" :disabled="!isAdmin">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
 
-      <button class="btn btn-primary">Luu</button>
+      <button class="btn btn-primary" style="margin-top: 20px" :disabled="!isAdmin">
+        Lưu
+      </button>
     </form>
 
-    <button @click="handleDelete()" class="btn btn-danger my-4">Xoa</button>
+    <button @click="handleDelete()" class="btn btn-danger my-4" :disabled="!isAdmin">
+      Xóa
+    </button>
   </div>
 </template>
 
@@ -31,6 +35,7 @@ export default defineComponent({
   data() {
     return {
       currentuser: {} as user,
+      isAdmin: false, // Điều này dựa trên giá trị từ storage
     };
   },
   methods: {
@@ -43,23 +48,27 @@ export default defineComponent({
       }
     },
     async handleUpdate() {
-      try {
-        if (typeof this.$route.params.id === "string") {
-          await updateuser(this.$route.params.id, this.currentuser);
-          this.$router.push("/");
+      if (this.isAdmin) {
+        try {
+          if (typeof this.$route.params.id === "string") {
+            await updateuser(this.$route.params.id, this.currentuser);
+            this.$router.push("/");
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
       }
     },
     async handleDelete() {
-      try {
-        if (typeof this.$route.params.id === "string") {
-          deleteuser(this.$route.params.id);
-          this.$router.push("/");
+      if (this.isAdmin) {
+        try {
+          if (typeof this.$route.params.id === "string") {
+            deleteuser(this.$route.params.id);
+            this.$router.push("/");
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
       }
     },
   },
@@ -67,6 +76,9 @@ export default defineComponent({
     if (typeof this.$route.params.id === "string") {
       this.loaduser(this.$route.params.id);
     }
+    // Kiểm tra và cập nhật giá trị isAdmin từ storage (localStorage)
+    const isAdminValue = localStorage.getItem("isAdmin");
+    this.isAdmin = isAdminValue === "true";
   },
 });
 </script>

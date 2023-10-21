@@ -70,6 +70,12 @@ export default defineComponent({
           localStorage.setItem("userData", JSON.stringify(response.data));
 
           localStorage.setItem("userToken", response.data.token);
+          console.log(response.data.user.role);
+          if (response.data.user.role === "admin") {
+            localStorage.setItem("isAdmin", "true");
+          } else {
+            localStorage.setItem("isAdmin", "false");
+          }
           router.push("/user");
           const token = localStorage.getItem("userToken");
           if (token) {
@@ -78,7 +84,6 @@ export default defineComponent({
             axios.defaults.headers.common[
               "Authorization"
             ] = `Bearer ${response.data.token}`;
-
           }
         }
       } catch (error) {
