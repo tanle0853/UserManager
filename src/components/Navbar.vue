@@ -65,7 +65,17 @@ export default defineComponent<NavbarComponent>({
   },
   computed: {
     showListAndAdd() {
-      return this.$route.name !== "Login";
+      if (this.$route.name === "Login") {
+        return false;
+      } else {
+        const userData = localStorage.getItem("userData");
+        if (userData) {
+          const user = JSON.parse(userData);
+          // Kiểm tra vai trò của người dùng, ẩn nút "Thêm mới" nếu là "user"
+          return user.user.role !== "user";
+        }
+        return true;
+      }
     },
     brandLink() {
       return this.$route.name === "Login" ? "#" : "/";
