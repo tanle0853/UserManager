@@ -74,7 +74,7 @@ router.post("/login", async (req, res) => {
     // Xác minh mật khẩu thành công, bạn có thể thực hiện các hành động sau đây:
 
     // 1. Sử dụng cùng một secretKey từ biến môi trường
-    
+    console.log("truoc khi", secretKey);
     // 2. Tạo token xác thực và gửi về cho người dùng
     const token = jwt.sign({ userId: user._id, userName: user.username }, secretKey, {
       expiresIn: "2h",
@@ -127,6 +127,51 @@ router.post("/refresh", async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
+
+router.post("/logout", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  console.log("refreshToken", refreshToken);
+  try {
+    // Lấy thông tin user dựa trên refreshToken
+    const refreshTokenDoc = await RefreshToken.findOne({ refreshToken });
+
+    if (!refreshTokenDoc) {
+      // Nếu không tìm thấy refreshToken, có thể xem là đã logout thành công
+      res.json({ message: "Logout successful" });
+      return;
+    }
+
+    // Xóa refreshToken tương ứng khỏi cơ sở dữ liệu
+    await RefreshToken.deleteOne({ refreshToken });
+
+    // Xóa Refresh Token trên máy khách (clear cookie)
+    res.clearCookie("refreshToken");
+
+    // Đồng thời, bạn cũng có thể xóa AccessToken nếu bạn muốn
+    // Ví dụ: await AccessToken.deleteOne({ userId: refreshTokenDoc.userId });
+
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+router.get("/user/search/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
+    if (username) {
+      query = { username: { $regex: username, $options: 'i' } };
+    }
+    const users = await User.find(query);
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
 router.use(authenticateToken);
 router.get("/user", checkRole('admin'), async (req: Request, res: Response) => {
   try {
@@ -173,54 +218,11 @@ router.put("/user/:id", checkRole('admin'), async (req, res) => {
     res.status(500).json({ message: "An error occurred" });
   }
 });
-router.get("/user/search/:username", checkRole('admin'), async (req, res) => {
-  try {
-    const username = req.params.username;
-    let query = {}; // Đây là truy vấn mặc định, tìm tất cả người dùng
-    if (username) {
-      query = { username: { $regex: username, $options: 'i' } };
-    }
-    const users = await User.find(query);
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
 
 router.delete("/user/:id", checkRole('admin'), async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred" });
-  }
-});
-
-router.post("/logout", checkRole('admin'), async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  console.log("refreshToken", refreshToken);
-  try {
-    // Lấy thông tin user dựa trên refreshToken
-    const refreshTokenDoc = await RefreshToken.findOne({ refreshToken });
-
-    if (!refreshTokenDoc) {
-      // Nếu không tìm thấy refreshToken, có thể xem là đã logout thành công
-      res.json({ message: "Logout successful" });
-      return;
-    }
-
-    // Xóa refreshToken tương ứng khỏi cơ sở dữ liệu
-    await RefreshToken.deleteOne({ refreshToken });
-
-    // Xóa Refresh Token trên máy khách (clear cookie)
-    res.clearCookie("refreshToken");
-
-    // Đồng thời, bạn cũng có thể xóa AccessToken nếu bạn muốn
-    // Ví dụ: await AccessToken.deleteOne({ userId: refreshTokenDoc.userId });
-
-    res.json({ message: "Logout successful" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred" });

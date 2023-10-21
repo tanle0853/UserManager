@@ -1,7 +1,11 @@
 // middleware.ts
 import { Request, Response, NextFunction } from "express";
-import jwt, { Secret } from "jsonwebtoken";
+import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 import User, { IUser } from "../models/User";
+import dotenv from 'dotenv';
+
+// Load biến môi trường từ tệp .env
+dotenv.config();
 
 declare global {
   namespace Express {
@@ -10,7 +14,7 @@ declare global {
     }
   }
 }
-
+const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
 export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Response, next: NextFunction) => {
   if (req.user && req.user.role === role) {
     next();
@@ -23,15 +27,15 @@ export const checkRole = (role: 'user' | 'admin') => (req: Request, res: Respons
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
 
   const token = req.header('Authorization');
-  console.log('anh ban toi la tan day', token);
+  const parts: any = token?.toString().split(" "); // Tách chuỗi thành mảng sử dụng khoảng trắng làm dấu phân cách
+  const tokenWithoutBearer = parts[1];
+  console.log('anh ban toi la tan day', tokenWithoutBearer);
+  console.log("sau khi", secretKey);
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-  const secretKey: Secret = process.env.JWT_SECRET || 'default-secret-key';
-
   try {
-    //loi tai day
-    const decodedToken = jwt.verify(token, secretKey) as { userId: string };
+
+    const decodedToken = jwt.verify(tokenWithoutBearer, secretKey) as { userId: string };
     console.log("decodedToken", decodedToken);
     const user = await User.findById(decodedToken.userId);
     console.log("user", user);
