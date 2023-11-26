@@ -7,6 +7,7 @@
         type="text"
         class="form-control"
         placeholder="Tìm kiếm theo tên người dùng"
+        @keydown.enter="searchUsers"
         v-model="searchQuery"
       />
       <button
