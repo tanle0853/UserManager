@@ -93,7 +93,18 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
+// router.post("/user", async (req: Request, res: Response) => {
+//   try {
+//     const { username, password } = req.body;
+//     const hashedPassword = await Password.hash(password); // Mã hóa mật khẩu trước khi lưu trữ
+//     const newUser = new User({ username, password: hashedPassword }); // Lưu trữ mật khẩu đã được mã hóa
+//     const savedUser = await newUser.save();
+//     res.json(savedUser);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "An error occurred" });
+//   }
+// });
 router.post("/refresh", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -169,7 +180,7 @@ router.get("/user/search/:username", checkRole(['admin', 'user']), async (req, r
     }
 
     const users = await User.find(query);
-    
+
     // Ẩn người dùng hiện tại khỏi danh sách
     const currentUserIndex = users.findIndex(user => user._id.toString() === (req as any).user._id.toString());
     if (currentUserIndex !== -1) {

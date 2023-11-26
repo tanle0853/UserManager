@@ -5,9 +5,10 @@
 yarn install
 ```
 
-### Compiles and hot-reloads for development
+### Cai dat mongoDB
 ```
-yarn serve
+https://www.youtube.com/watch?v=RmPp69cwNgg
+ip:127.0.0.1:27017
 ```
 
 ### Compiles and minifies for production
@@ -15,19 +16,37 @@ yarn serve
 yarn build
 ```
 
-### Run your unit tests
+### khoi dong server 
 ```
-yarn test:unit
-```
-
-### Run your end-to-end tests
-```
-yarn test:e2e
+cd server 
+yarn start
 ```
 
-### Lints and fixes files
+### tao moi account dung postman hoac thunder client cua vsc
 ```
-yarn lint
+trong file :C:\UserManager\UserManager\usermanager\server\routes\index.ts
+-mo comment cho doan code them user tu dong 96~107
+-comment dong 215~226
+-yarn build 
+-yarn start
+url:http://localhost:3000/api/user/
+method:post
+body:
+{
+   "username": "username1",
+   "password": "abcabc",
+   "role":"admin",
+}
+-sau khi tao account xong thi 
+-mo comment cho doan code them user tu dong 215~226
+-comment dong 96~107
+```
+
+### khoi dong client
+-cd src
+-yarn serve
+-khoi dong client voi localhost:8080
+-dang nhap bang account vua tao 
 ```
 
 ### Customize configuration
